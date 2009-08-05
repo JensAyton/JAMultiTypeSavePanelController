@@ -60,6 +60,12 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @synthesize formatPopUp = _formatPopUp;
 
 
++ (id) controllerWithSupportedUTIs:(NSArray *)supportedUTIs
+{
+	return [[[self alloc] initWithSupportedUTIs:supportedUTIs] autorelease];
+}
+
+
 - (id) initWithSupportedUTIs:(NSArray *)supportedUTIs
 {
 	if ([supportedUTIs count] == 0)

@@ -44,6 +44,7 @@
 	BOOL						_createdPanel;
 }
 
++ (id) controllerWithSupportedUTIs:(NSArray *)supportedUTIs;
 - (id) initWithSupportedUTIs:(NSArray *)supportedUTIs;
 
 @property (copy, readonly, nonatomic) NSArray *supportedUTIs;
