@@ -241,6 +241,12 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 		{
 			name = [[[name substringToIndex:1] capitalizedString] stringByAppendingString:[name substringFromIndex:1]];
 		}
+		else if (name == nil)
+		{
+			name = [workspace preferredFilenameExtensionForType:uti];
+			if (name != nil)  name = [@"." stringByAppendingString:name];
+			else  name = uti;
+		}
 		NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:name
 													  action:@selector(menuItemSelected:)
 											   keyEquivalent:@""];
