@@ -1,11 +1,3 @@
-//
-//  TestController.m
-//  JAMultiTypeSavePanelControllerTest
-//
-//  Created by Jens Ayton on 2009-08-05.
-//  Copyright 2009 Jens Ayton. All rights reserved.
-//
-
 #import "TestController.h"
 #import "JAMultiTypeSavePanelController.h"
 

@@ -31,9 +31,6 @@
 
 @property (copy, readwrite, nonatomic) NSArray *supportedUTIs;
 
-@property (assign, nonatomic) IBOutlet NSView *accessoryView;
-@property (assign, nonatomic) IBOutlet NSPopUpButton *formatPopUp;
-
 - (void) prepareToRun;
 - (void) cleanUp;
 

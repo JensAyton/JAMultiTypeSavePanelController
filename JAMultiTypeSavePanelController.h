@@ -77,4 +77,7 @@
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;
 - (NSInteger)runModal;
 
+@property (assign, nonatomic) IBOutlet NSView *accessoryView;
+@property (assign, nonatomic) IBOutlet NSPopUpButton *formatPopUp;
+
 @end
