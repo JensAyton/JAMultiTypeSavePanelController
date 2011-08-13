@@ -49,13 +49,27 @@ void populateSTypes() {
 							   if (returnCode == NSOKButton)
 							   {
 								   NSError *error = nil;
-								   NSLog(@"Saving as %@/%@", sheetController.selectedUTI, [sTypes objectForKey:sheetController.selectedUTI]);
+								   NSString *documentType = [sTypes objectForKey:sheetController.selectedUTI];
+								   NSLog(@"Saving as %@/%@", sheetController.selectedUTI, documentType);
 								   
 								   NSRange range = {0, textView.textStorage.length};
-								   NSDictionary *typeAttr = [NSDictionary dictionaryWithObject:[sTypes objectForKey:sheetController.selectedUTI] forKey:NSDocumentTypeDocumentAttribute];
-								   NSString *path = sheetController.savePanel.filename;
+								   NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
+								   NSURL *fileURL = sheetController.savePanel.URL;
 								   
-								   NSFileWrapper *wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:typeAttr error:&error];
+								   NSFileWrapper *wrapper = nil;
+								   if (documentType == NSRTFDTextDocumentType || (documentType == NSPlainTextDocumentType))
+								   {
+									   wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:attributesDict error:&error];
+								   }
+								   else
+								   {
+									   NSData *data = [textView.textStorage dataFromRange:range documentAttributes:attributesDict error:&error];
+									   if (data) {
+										   wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
+										   if (!wrapper && &error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+									   }
+								   }
+								   
 								   if (wrapper == nil)
 								   {
 									   [[NSAlert alertWithError:error] beginSheetModalForWindow:window
@@ -65,18 +79,13 @@ void populateSTypes() {
 								   }
 								   else
 								   {
-									   BOOL OK = [wrapper writeToFile:path atomically:YES updateFilenames:YES];
+									   BOOL OK = [wrapper writeToURL:fileURL options:(NSFileWrapperWritingAtomic | NSFileWrapperWritingWithNameUpdating) originalContentsURL:nil error:&error];
 									   if (!OK)
 									   {
-										   [[NSAlert alertWithMessageText:@"Failed to save document."
-															defaultButton:nil
-														  alternateButton:nil
-															  otherButton:nil
-												informativeTextWithFormat:@"Unfortunately, NSFileWrapper doesn't feel like telling us why."]
-											beginSheetModalForWindow:window
-											modalDelegate:nil
-											didEndSelector:nil
-											contextInfo:nil];
+										   [[NSAlert alertWithError:error] beginSheetModalForWindow:window
+																					  modalDelegate:nil
+																					 didEndSelector:NULL
+																						contextInfo:nil];
 									   }
 								   }
 							   }
