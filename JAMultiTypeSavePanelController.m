@@ -342,7 +342,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @end
 
 
-static int CompareMenuItems(id a, id b, void *context)
+NSInteger CompareMenuItems(id a, id b, void *context)
 {
 #pragma unused (context)
 	return [[a title] caseInsensitiveCompare:[b title]];
