@@ -74,6 +74,14 @@
 	   modalDelegate:(id)delegate
 	  didEndSelector:(SEL)didEndSelector;
 
+
+#if NS_BLOCKS_AVAILABLE
+- (void)beginSheetForDirectory:(NSString *)path
+						  file:(NSString *)name
+				modalForWindow:(NSWindow *)docWindow
+			 completionHandler:(void (^)(NSInteger result))handler;
+#endif
+
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;
 - (NSInteger)runModal;
 

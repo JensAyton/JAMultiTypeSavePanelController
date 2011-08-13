@@ -24,46 +24,44 @@ static NSDictionary *sTypes = nil;
 	}
 	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
 	saveController.autoSaveSelectedUTIKey = @"type";
-	[saveController beginForFile:@"untitled"
-				  modalForWindow:window
-				   modalDelegate:self
-				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)];
-}
-
-
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-	NSLog(@"Save panel result: %i", returnCode);
-	[sheetController.savePanel orderOut:nil];
 	
-	if (returnCode == NSOKButton)
-	{
-		NSError *error = nil;
-		NSLog(@"Saving as %@/%@", sheetController.selectedUTI, [sTypes objectForKey:sheetController.selectedUTI]);
-		
-		NSRange range = {0, textView.textStorage.length};
-		NSDictionary *typeAttr = [NSDictionary dictionaryWithObject:[sTypes objectForKey:sheetController.selectedUTI] forKey:NSDocumentTypeDocumentAttribute];
-		NSURL *url = sheetController.savePanel.URL;
-		
-		NSFileWrapper *wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:typeAttr error:&error];
-		BOOL OK = wrapper != nil;
-		
-		if (OK)
-		{
-			OK = [wrapper writeToURL:url
-							 options:NSFileWrapperWritingAtomic
-				 originalContentsURL:nil
-							   error:&error];
-		}
-		
-		if (!OK)
-		{
-			[[NSAlert alertWithError:error] beginSheetModalForWindow:window
-													   modalDelegate:nil
-													  didEndSelector:NULL
-														 contextInfo:nil];
-		}
-	}
+	[saveController beginSheetForDirectory:nil
+									  file:@"untitled"
+							modalForWindow:window
+						 completionHandler:^(NSInteger returnCode)
+	 {
+		 NSLog(@"Save panel result: %i", returnCode);
+		 [saveController.savePanel orderOut:nil];
+		 
+		 if (returnCode == NSOKButton)
+		 {
+			 NSError *error = nil;
+			 NSLog(@"Saving as %@/%@", saveController.selectedUTI, [sTypes objectForKey:saveController.selectedUTI]);
+			 
+			 NSRange range = {0, textView.textStorage.length};
+			 NSDictionary *typeAttr = [NSDictionary dictionaryWithObject:[sTypes objectForKey:saveController.selectedUTI] forKey:NSDocumentTypeDocumentAttribute];
+			 NSURL *url = saveController.savePanel.URL;
+			 
+			 NSFileWrapper *wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:typeAttr error:&error];
+			 BOOL OK = wrapper != nil;
+			 
+			 if (OK)
+			 {
+				 OK = [wrapper writeToURL:url
+								  options:NSFileWrapperWritingAtomic
+					  originalContentsURL:nil
+									error:&error];
+			 }
+			 
+			 if (!OK)
+			 {
+				 [[NSAlert alertWithError:error] beginSheetModalForWindow:window
+															modalDelegate:nil
+														   didEndSelector:NULL
+															  contextInfo:nil];
+			 }
+		 }
+	 }];
 }
 
 @end
