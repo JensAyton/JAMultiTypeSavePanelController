@@ -370,7 +370,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti)
 		[seenUTIs addObject:thisUTI];
 		
 		// Add UTIs this UTI conforms to to the queue.
-		NSDictionary *thisUTIDecl = (NSDictionary *)UTTypeCopyDeclaration((CFStringRef)thisUTI);
+		NSDictionary *thisUTIDecl = [NSMakeCollectable(UTTypeCopyDeclaration((CFStringRef)thisUTI)) autorelease];
 		id thisConformsTo = [thisUTIDecl objectForKey:(NSString *)kUTTypeConformsToKey];
 		// Conforms to may be an array or a single string.
 		if ([thisConformsTo isKindOfClass:[NSString class]])  [queue addObject:thisConformsTo];
