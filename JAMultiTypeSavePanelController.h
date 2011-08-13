@@ -41,6 +41,7 @@
 	SEL							_selector;
 	BOOL						_sortTypesByName;
 	BOOL						_running;
+	BOOL						_prepared;
 	BOOL						_createdPanel;
 }
 
@@ -76,10 +77,10 @@
 
 
 #if NS_BLOCKS_AVAILABLE
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
-				modalForWindow:(NSWindow *)docWindow
-			 completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetForDirectory:(NSString *)path file:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetForFileName:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 #endif
 
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;

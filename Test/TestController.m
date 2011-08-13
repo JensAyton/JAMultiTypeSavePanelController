@@ -4,11 +4,7 @@
 
 static NSDictionary *sTypes = nil;
 
-
-@implementation TestController
-
-- (IBAction) save:(id)sender
-{
+void populateSTypes() {
 	// Unfortunately, NSAttributedString will only give you types that are not UTIs and specify readable rather than writeable types, so we need to do this manually.
 	if (sTypes == nil)
 	{
@@ -22,46 +18,103 @@ static NSDictionary *sTypes = nil;
 		nil];
 		[sTypes retain];
 	}
+}
+
+@interface TestController ()
+- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)saveController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+@end
+
+
+@implementation TestController
+
+- (IBAction) save:(id)sender
+{
+	populateSTypes();
 	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
 	saveController.autoSaveSelectedUTIKey = @"type";
+	[saveController beginForFile:@"untitled"
+				  modalForWindow:window
+				   modalDelegate:self
+				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)];
+}
+
+#if NS_BLOCKS_AVAILABLE
+- (IBAction) saveUsingBlock:(id)sender
+{
+	populateSTypes();
+	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
+	saveController.autoSaveSelectedUTIKey = @"type";
+	[saveController beginSheetForFileName:@"untitled"
+						   modalForWindow:window 
+						completionHandler:^(NSInteger returnCode) {
+							// Alternatively, code similar to “-savePanelDidEnd:returnCode:contextInfo:” could be included here directly
+							[self savePanelDidEnd:saveController returnCode:returnCode contextInfo:NULL];
+						}];
+}
+#else
+- (IBAction) saveUsingBlock:(id)sender
+{
+	NSLog(@"Blocks unavailable!");
+}
+#endif 
+	 
+- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)saveController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
 	
-	[saveController beginSheetForDirectory:nil
-									  file:@"untitled"
-							modalForWindow:window
-						 completionHandler:^(NSInteger returnCode)
-	 {
-		 NSLog(@"Save panel result: %i", returnCode);
-		 [saveController.savePanel orderOut:nil];
-		 
-		 if (returnCode == NSOKButton)
-		 {
-			 NSError *error = nil;
-			 NSLog(@"Saving as %@/%@", saveController.selectedUTI, [sTypes objectForKey:saveController.selectedUTI]);
-			 
-			 NSRange range = {0, textView.textStorage.length};
-			 NSDictionary *typeAttr = [NSDictionary dictionaryWithObject:[sTypes objectForKey:saveController.selectedUTI] forKey:NSDocumentTypeDocumentAttribute];
-			 NSURL *url = saveController.savePanel.URL;
-			 
-			 NSFileWrapper *wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:typeAttr error:&error];
-			 BOOL OK = wrapper != nil;
-			 
-			 if (OK)
-			 {
-				 OK = [wrapper writeToURL:url
-								  options:NSFileWrapperWritingAtomic
-					  originalContentsURL:nil
-									error:&error];
-			 }
-			 
-			 if (!OK)
-			 {
-				 [[NSAlert alertWithError:error] beginSheetModalForWindow:window
-															modalDelegate:nil
-														   didEndSelector:NULL
-															  contextInfo:nil];
-			 }
-		 }
-	 }];
+	NSLog(@"Save panel result: %i", returnCode);
+	[saveController.savePanel orderOut:nil];
+	
+	if (returnCode == NSOKButton)
+	{
+		NSError *error = nil;
+		NSString *documentType = [sTypes objectForKey:saveController.selectedUTI];
+		NSLog(@"Saving as %@/%@", saveController.selectedUTI, documentType);
+		
+		NSRange range = {0, textView.textStorage.length};
+		NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
+		NSURL *fileURL = saveController.savePanel.URL;
+#else
+		NSString *path = saveController.savePanel.filename;
+#endif
+		
+		NSFileWrapper *wrapper = nil;
+		if (documentType == NSRTFDTextDocumentType || (documentType == NSPlainTextDocumentType))
+		{
+			wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:attributesDict error:&error];
+		}
+		else
+		{
+			NSData *data = [textView.textStorage dataFromRange:range documentAttributes:attributesDict error:&error];
+			if (data) {
+				wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
+				if (!wrapper && &error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+			}
+		}
+		
+		BOOL OK = (wrapper != nil);
+		
+		if (OK)
+		{
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
+			OK = [wrapper writeToURL:fileURL 
+							 options:(NSFileWrapperWritingAtomic | NSFileWrapperWritingWithNameUpdating) 
+				 originalContentsURL:nil 
+							   error:&error];
+#else
+			OK = [wrapper writeToFile:path atomically:YES updateFilenames:YES];
+#endif
+		}
+		
+		if (!OK)
+		{
+			[[NSAlert alertWithError:error] beginSheetModalForWindow:window
+													   modalDelegate:nil
+													  didEndSelector:NULL
+														 contextInfo:nil];
+		}
+		
+	}
 }
 
 @end
