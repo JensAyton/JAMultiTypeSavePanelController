@@ -43,31 +43,25 @@ static NSDictionary *sTypes = nil;
 		
 		NSRange range = {0, textView.textStorage.length};
 		NSDictionary *typeAttr = [NSDictionary dictionaryWithObject:[sTypes objectForKey:sheetController.selectedUTI] forKey:NSDocumentTypeDocumentAttribute];
-		NSString *path = sheetController.savePanel.filename;
+		NSURL *url = sheetController.savePanel.URL;
 		
 		NSFileWrapper *wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:typeAttr error:&error];
-		if (wrapper == nil)
+		BOOL OK = wrapper != nil;
+		
+		if (OK)
+		{
+			OK = [wrapper writeToURL:url
+							 options:NSFileWrapperWritingAtomic
+				 originalContentsURL:nil
+							   error:&error];
+		}
+		
+		if (!OK)
 		{
 			[[NSAlert alertWithError:error] beginSheetModalForWindow:window
 													   modalDelegate:nil
 													  didEndSelector:NULL
 														 contextInfo:nil];
-		}
-		else
-		{
-			BOOL OK = [wrapper writeToFile:path atomically:YES updateFilenames:YES];
-			if (!OK)
-			{
-				[[NSAlert alertWithMessageText:@"Failed to save document."
-								 defaultButton:nil
-							   alternateButton:nil
-								   otherButton:nil
-					 informativeTextWithFormat:@"Unfortunately, NSFileWrapper doesn't feel like telling us why."]
-				 beginSheetModalForWindow:window
-							modalDelegate:nil
-						   didEndSelector:nil
-							  contextInfo:nil];
-			}
 		}
 	}
 }

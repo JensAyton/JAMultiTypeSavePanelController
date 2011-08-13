@@ -2,7 +2,7 @@
 	JAMultiTypeSavePanelController.m
 	
 	
-	© 2009 Jens Ayton
+	© 2009–2011 Jens Ayton
 	
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the “Software”),
@@ -25,6 +25,10 @@
 
 #import "JAMultiTypeSavePanelController.h"
 #import <objc/message.h>
+
+#ifndef NS_BLOCKS_AVAILABLE
+#define NS_BLOCKS_AVAILABLE 0
+#endif
 
 
 @interface JAMultiTypeSavePanelController ()
@@ -50,7 +54,6 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @implementation JAMultiTypeSavePanelController
 
 @synthesize supportedUTIs = _supportedUTIs;
-@synthesize sortTypesByName = _sortTypesByName;
 @synthesize sortTypesByName = _sortTypesByName;
 
 @synthesize accessoryView = _accessoryView;
@@ -169,12 +172,25 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	_modalDelegate = [delegate retain];
 	_selector = didEndSelector;
 	
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060) && NS_BLOCKS_AVAILABLE
+	NSSavePanel *panel = self.savePanel;
+	if (path != nil)  panel.directoryURL = [NSURL fileURLWithPath:path];
+	else  panel.directoryURL = nil;
+	panel.nameFieldStringValue = name;
+	
+	[panel beginSheetModalForWindow:docWindow
+				  completionHandler:^(NSInteger result)
+	{
+		[self savePanelDidEnd:panel returnCode:result contextInfo:contextInfo];
+	}];
+#else
 	[self.savePanel beginSheetForDirectory:path
 									  file:name
 						    modalForWindow:docWindow
 							 modalDelegate:self
 							didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
 							   contextInfo:contextInfo];
+#endif
 }
 
 
@@ -195,7 +211,19 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
 {
 	[self prepareToRun];
-	NSInteger result = [self.savePanel runModalForDirectory:path file:name];
+	NSInteger result;
+	
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
+	NSSavePanel *panel = self.savePanel;
+	if (path != nil)  panel.directoryURL = [NSURL fileURLWithPath:path];
+	else  panel.directoryURL = nil;
+	panel.nameFieldStringValue = name;
+	
+	result = [panel runModal];
+#else
+	result = [self.savePanel runModalForDirectory:path file:name];
+#endif
+	
 	[self cleanUp];
 	return result;
 }
