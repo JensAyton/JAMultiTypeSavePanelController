@@ -38,6 +38,7 @@ void populateSTypes() {
 				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)];
 }
 
+#if NS_BLOCKS_AVAILABLE
 - (IBAction) saveUsingBlock:(id)sender
 {
 	populateSTypes();
@@ -50,7 +51,12 @@ void populateSTypes() {
 							[self savePanelDidEnd:saveController returnCode:returnCode contextInfo:NULL];
 						}];
 }
-	 
+#else
+- (IBAction) saveUsingBlock:(id)sender
+{
+	NSLog(@"Blocks unavailable!");
+}
+#endif 
 	 
 - (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)saveController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
@@ -66,7 +72,11 @@ void populateSTypes() {
 		
 		NSRange range = {0, textView.textStorage.length};
 		NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 		NSURL *fileURL = saveController.savePanel.URL;
+#else
+		NSString *path = saveController.savePanel.filename;
+#endif
 		
 		NSFileWrapper *wrapper = nil;
 		if (documentType == NSRTFDTextDocumentType || (documentType == NSPlainTextDocumentType))
@@ -86,10 +96,14 @@ void populateSTypes() {
 		
 		if (OK)
 		{
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 			OK = [wrapper writeToURL:fileURL 
 							 options:(NSFileWrapperWritingAtomic | NSFileWrapperWritingWithNameUpdating) 
 				 originalContentsURL:nil 
 							   error:&error];
+#else
+			OK = [wrapper writeToFile:path atomically:YES updateFilenames:YES];
+#endif
 		}
 		
 		if (!OK)
