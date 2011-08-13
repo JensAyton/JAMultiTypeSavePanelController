@@ -147,7 +147,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (void) setSavePanel:(NSSavePanel *)panel
 {
-	NSAssert(!_running, @"Can't set savePanel of JAMultiTypeSavePanelController while save panel is running.");
+	NSAssert(!_prepared, @"Can't set savePanel of JAMultiTypeSavePanelController after save panel has been prepared.");
 	
 	if (panel != _savePanel)
 	{
@@ -169,6 +169,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	_modalDelegate = [delegate retain];
 	_selector = didEndSelector;
 	
+	_running = YES;
 	[self.savePanel beginSheetForDirectory:path
 									  file:name
 						    modalForWindow:docWindow
@@ -195,7 +196,10 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
 {
 	[self prepareToRun];
+	
+	_running = YES;
 	NSInteger result = [self.savePanel runModalForDirectory:path file:name];
+	
 	[self cleanUp];
 	return result;
 }
@@ -204,6 +208,55 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (NSInteger)runModal
 {
 	return [self runModalForDirectory:nil file:@""];
+}
+
+- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL
+							 file:(NSString *)name
+				   modalForWindow:(NSWindow *)window
+				completionHandler:(void (^)(NSInteger result))handler;
+{
+	NSAssert(!_prepared, @"Can't begin another savePanel of JAMultiTypeSavePanelController while the previous savePanel is still being used.");
+
+	[self prepareToRun];
+	
+	[self.savePanel setDirectoryURL:directoryURL];
+	
+	[self beginSheetForFileName:name
+				 modalForWindow:(NSWindow *)window
+			  completionHandler:^(NSInteger result) {
+				  handler(result);
+				  if (_createdPanel) {
+					  self.savePanel = nil;
+					  _createdPanel = NO;
+				  }
+				  // Cleanup is done in -beginSheetModalForWindow:completionHandler:
+			  }
+	 ];
+}
+
+- (void)beginSheetForFileName:(NSString *)name
+			   modalForWindow:(NSWindow *)window
+			completionHandler:(void (^)(NSInteger result))handler;
+{
+	if (_prepared == NO) [self prepareToRun];
+
+	[self.savePanel setNameFieldStringValue:name];
+	
+	[self beginSheetModalForWindow:window
+				 completionHandler:handler];
+}
+
+
+- (void)beginSheetModalForWindow:(NSWindow *)window 
+			   completionHandler:(void (^)(NSInteger result))handler;
+{
+	if (_prepared == NO) [self prepareToRun];
+
+	_running = YES;
+	[self.savePanel beginSheetModalForWindow:window completionHandler:^(NSInteger result) {
+		handler(result);
+		[self cleanUp];
+	}];
 }
 
 
@@ -222,7 +275,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	self.savePanel.accessoryView = self.accessoryView;
 	[self updateSavePanelFileTypes];
 	
-	_running = YES;
+	_prepared = YES;
 }
 
 
@@ -279,12 +332,15 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (void) cleanUp
 {
 	_running = NO;
+
 	self.savePanel.accessoryView = nil;
 	
 	if (self.autoSaveSelectedUTIKey != nil)
 	{
 		[[NSUserDefaults standardUserDefaults] setObject:self.selectedUTI forKey:self.autoSaveSelectedUTIKey];
 	}
+
+	_prepared = NO;
 }
 
 

@@ -41,6 +41,7 @@
 	SEL							_selector;
 	BOOL						_sortTypesByName;
 	BOOL						_running;
+	BOOL						_prepared;
 	BOOL						_createdPanel;
 }
 
@@ -76,6 +77,9 @@
 
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;
 - (NSInteger)runModal;
+- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetForFileName:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 
 @property (assign, nonatomic) IBOutlet NSView *accessoryView;
 @property (assign, nonatomic) IBOutlet NSPopUpButton *formatPopUp;

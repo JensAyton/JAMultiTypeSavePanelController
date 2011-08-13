@@ -8,5 +8,6 @@
 }
 
 - (IBAction) save:(id)sender;
+- (IBAction) saveUsingBlock:(id)sender;
 
 @end
