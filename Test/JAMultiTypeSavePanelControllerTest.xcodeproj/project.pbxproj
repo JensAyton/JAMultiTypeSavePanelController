@@ -22,7 +22,7 @@
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		1A4605C0102A2CD4001ADB67 /* JAMultiTypeSavePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JAMultiTypeSavePanelController.h; path = ../JAMultiTypeSavePanelController.h; sourceTree = SOURCE_ROOT; };
 		1A4605C1102A2CD4001ADB67 /* JAMultiTypeSavePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JAMultiTypeSavePanelController.m; path = ../JAMultiTypeSavePanelController.m; sourceTree = SOURCE_ROOT; };
-		1A4605C3102A2CD4001ADB67 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = "/Users/jayton/Programming/Projects/Google Code/trunk/Widgets/JAMultiTypeSavePanelController/English.lproj/JAMultiTypeSavePanelController.xib"; sourceTree = "<absolute>"; };
+		1A4605C3102A2CD4001ADB67 /* JAMultiTypeSavePanelController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = JAMultiTypeSavePanelController.xib; path = ../English.lproj/JAMultiTypeSavePanelController.xib; sourceTree = SOURCE_ROOT; };
 		1A4605C6102A2CDE001ADB67 /* TestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestController.h; sourceTree = "<group>"; };
 		1A4605C7102A2CDE001ADB67 /* TestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestController.m; sourceTree = "<group>"; };
 		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -200,7 +200,7 @@
 		1A4605C2102A2CD4001ADB67 /* JAMultiTypeSavePanelController.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				1A4605C3102A2CD4001ADB67 /* English */,
+				1A4605C3102A2CD4001ADB67 /* JAMultiTypeSavePanelController.xib */,
 			);
 			name = JAMultiTypeSavePanelController.xib;
 			sourceTree = "<group>";
