@@ -75,11 +75,16 @@
 	   modalDelegate:(id)delegate
 	  didEndSelector:(SEL)didEndSelector;
 
-- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;
-- (NSInteger)runModal;
+
+#if NS_BLOCKS_AVAILABLE
 - (void)beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void)beginSheetForDirectory:(NSString *)path file:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void)beginSheetForFileName:(NSString *)name modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+#endif
+
+- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name;
+- (NSInteger)runModal;
 
 @property (assign, nonatomic) IBOutlet NSView *accessoryView;
 @property (assign, nonatomic) IBOutlet NSPopUpButton *formatPopUp;

@@ -2,7 +2,8 @@
 	JAMultiTypeSavePanelController.m
 	
 	
-	© 2009 Jens Ayton
+	© 2009–2011 Jens Ayton
+	© 2011 Jan Weiß
 	
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the “Software”),
@@ -25,6 +26,12 @@
 
 #import "JAMultiTypeSavePanelController.h"
 #import <objc/message.h>
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
+#if NS_BLOCKS_AVAILABLE
+#define USE_BLOCKY_APIS 1
+#endif
+#endif
 
 
 @interface JAMultiTypeSavePanelController ()
@@ -164,18 +171,33 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 				didEndSelector:(SEL)didEndSelector
 				   contextInfo:(void *)contextInfo
 {
-	[self prepareToRun];
 	[self retain];		// Balanced in savePanelDidEnd:returnCode:contextInfo:
+
 	_modalDelegate = [delegate retain];
 	_selector = didEndSelector;
+
+#if USE_BLOCKY_APIS
+	NSSavePanel *panel = self.savePanel;
+
+	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
+
+	[self beginSheetForDirectoryURL:directoryURL
+							   file:name 
+					 modalForWindow:docWindow 
+				  completionHandler:^(NSInteger result)
+	 {
+		 [self savePanelDidEnd:panel returnCode:result contextInfo:contextInfo];
+	 }];
+#else
+	[self prepareToRun];
 	
-	_running = YES;
 	[self.savePanel beginSheetForDirectory:path
 									  file:name
 						    modalForWindow:docWindow
 							 modalDelegate:self
 							didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
 							   contextInfo:contextInfo];
+#endif
 }
 
 
@@ -196,9 +218,23 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
 {
 	[self prepareToRun];
+	NSInteger result;
 	
-	_running = YES;
-	NSInteger result = [self.savePanel runModalForDirectory:path file:name];
+#if USE_BLOCKY_APIS
+	NSSavePanel *panel = self.savePanel;
+	
+	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
+	
+	[self beginSheetForDirectoryURL:directoryURL 
+							   file:name 
+					 modalForWindow:nil 
+				  completionHandler:^(NSInteger result)
+	 {
+		 [self savePanelDidEnd:panel returnCode:result contextInfo:NULL];
+	 }];
+#else
+	result = [self.savePanel runModalForDirectory:path file:name];
+#endif
 	
 	[self cleanUp];
 	return result;
@@ -210,6 +246,21 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	return [self runModalForDirectory:nil file:@""];
 }
 
+
+#if NS_BLOCKS_AVAILABLE
+- (void)beginSheetForDirectory:(NSString *)path
+						  file:(NSString *)name
+				modalForWindow:(NSWindow *)window
+			 completionHandler:(void (^)(NSInteger result))handler;
+{
+	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
+
+	[self beginSheetForDirectoryURL:directoryURL
+							   file:name 
+					 modalForWindow:window 
+				  completionHandler:handler];
+}
+
 - (void)beginSheetForDirectoryURL:(NSURL *)directoryURL
 							 file:(NSString *)name
 				   modalForWindow:(NSWindow *)window
@@ -219,7 +270,10 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 	[self prepareToRun];
 	
-	[self.savePanel setDirectoryURL:directoryURL];
+	if (directoryURL != nil)
+	{
+		[self.savePanel setDirectoryURL:directoryURL];
+	}
 	
 	[self beginSheetForFileName:name
 				 modalForWindow:(NSWindow *)window
@@ -240,7 +294,10 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 {
 	if (_prepared == NO) [self prepareToRun];
 
-	[self.savePanel setNameFieldStringValue:name];
+	if (name != nil)
+	{
+		[self.savePanel setNameFieldStringValue:name];
+	}
 	
 	[self beginSheetModalForWindow:window
 				 completionHandler:handler];
@@ -258,6 +315,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 		[self cleanUp];
 	}];
 }
+#endif
 
 
 - (void) prepareToRun
