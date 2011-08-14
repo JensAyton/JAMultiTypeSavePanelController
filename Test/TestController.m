@@ -44,6 +44,15 @@ void populateSTypes() {
 	populateSTypes();
 	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
 	saveController.autoSaveSelectedUTIKey = @"type";
+
+	// Documents that contain attachments can only be saved in formats that support embedded graphics. 
+	if ([textView.textStorage containsAttachments]) {
+		saveController.enabledUTIs = [NSSet setWithObjects:(NSString *)kUTTypeRTFD, (NSString *)kUTTypeWebArchive, nil];
+	}
+	else {
+		saveController.enabledUTIs = nil; // Setting enabledUTIs to nil prevents it from having any effect.
+	}
+	
 	[saveController beginSheetForFileName:@"untitled"
 						   modalForWindow:window 
 						completionHandler:^(NSInteger returnCode) {

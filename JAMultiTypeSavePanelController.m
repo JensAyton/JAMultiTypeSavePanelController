@@ -42,7 +42,7 @@
 - (void) cleanUp;
 
 - (void) buildMenu;
-- (void) selectUTI:(NSString *)uti;
+- (BOOL) selectUTI:(NSString *)uti;
 - (void) updateSavePanelFileTypes;
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -57,6 +57,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @implementation JAMultiTypeSavePanelController
 
 @synthesize supportedUTIs = _supportedUTIs;
+@synthesize enabledUTIs = _enabledUTIs;
 @synthesize sortTypesByName = _sortTypesByName;
 
 @synthesize accessoryView = _accessoryView;
@@ -80,6 +81,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if ((self = [super init]))
 	{
 		self.supportedUTIs = supportedUTIs;
+		self.enabledUTIs = nil;
 		self.sortTypesByName = YES;
 	}
 	
@@ -94,6 +96,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	_formatPopUp = nil;
 	
 	self.selectedUTI = nil;
+	self.enabledUTIs = nil;
 	self.autoSaveSelectedUTIKey = nil;
 	self.savePanel = nil;
 	
@@ -376,11 +379,42 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	{
 		[menu addItem:item];
 	}
+
+	NSInteger firstEnabledItem = 0;
+
+	if (_enabledUTIs != nil) {
+		[menu setAutoenablesItems:NO];
+		
+		firstEnabledItem = -1;
+
+		NSInteger count = [menu numberOfItems];
+		NSMenuItem *item;
+		
+		for (int i = 0; i < count; i++) {
+			item = [menu itemAtIndex:i];
+			
+			if (![_enabledUTIs member:item.representedObject])
+			{
+				[item setEnabled:NO];
+			}
+			else
+			{
+				if (firstEnabledItem == -1) firstEnabledItem = i;  
+			}
+		}
+	}
+	else
+	{
+		[menu setAutoenablesItems:YES];
+	}
 	
 	self.formatPopUp.menu = menu;
 	
-	if (self.selectedUTI != nil)  [self selectUTI:self.selectedUTI];
-	else  self.selectedUTI = [[menu itemAtIndex:0] representedObject];
+	if ( !(self.selectedUTI != nil && [self selectUTI:self.selectedUTI]) )
+	{
+		self.selectedUTI = [[menu itemAtIndex:firstEnabledItem] representedObject];
+		[self selectUTI:self.selectedUTI];
+	}
 	
 	[menu release];
 }
@@ -401,15 +435,26 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void) selectUTI:(NSString *)uti
+- (BOOL) selectUTI:(NSString *)uti
 {
 	if (self.formatPopUp != nil)
 	{
-		NSInteger index = [self.formatPopUp indexOfItemWithRepresentedObject:uti];
-		if (index != NSNotFound)
+		NSMenu *menu = self.formatPopUp.menu;
+		NSInteger index = [menu indexOfItemWithRepresentedObject:uti];
+		NSMenuItem *item = [menu itemAtIndex:index];
+		if ((index != NSNotFound) && [item isEnabled])
 		{
 			[self.formatPopUp selectItemAtIndex:index];
+			return YES;
 		}
+		else
+		{
+			return NO;
+		}
+	}
+	else
+	{
+		return NO;
 	}
 }
 

@@ -34,6 +34,7 @@
 	NSView						*_accessoryView;
 	NSPopUpButton				*_formatPopUp;
 	NSArray						*_supportedUTIs;
+	NSSet						*_enabledUTIs;
 	NSString					*_selectedUTI;
 	NSString					*_autoSaveSelectedUTIKey;
 	NSSavePanel					*_savePanel;
@@ -49,6 +50,7 @@
 - (id) initWithSupportedUTIs:(NSArray *)supportedUTIs;
 
 @property (copy, readonly, nonatomic) NSArray *supportedUTIs;
+@property (copy, readwrite, nonatomic) NSSet *enabledUTIs;
 
 @property (copy, nonatomic) NSString *selectedUTI;
 @property (copy, nonatomic) NSString *autoSaveSelectedUTIKey;
