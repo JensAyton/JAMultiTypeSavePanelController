@@ -2,6 +2,12 @@
 #import "JAMultiTypeSavePanelController.h"
 
 
+NSString * const	Word97Type									= @"com.microsoft.word.doc";
+NSString * const	Word2003XMLType								= @"com.microsoft.word.wordml";
+NSString * const	Word2007Type								= @"org.openxmlformats.wordprocessingml.document";
+NSString * const	OpenDocumentTextType						= @"org.oasis-open.opendocument.text";
+
+
 static NSDictionary *sTypes = nil;
 
 void populateSTypes() {
@@ -9,13 +15,16 @@ void populateSTypes() {
 	if (sTypes == nil)
 	{
 		sTypes = [NSDictionary dictionaryWithObjectsAndKeys:
-		NSPlainTextDocumentType, @"public.plain-text",
-		NSRTFTextDocumentType, @"public.rtf",
-		NSRTFDTextDocumentType, @"com.apple.rtfd",
-		NSHTMLTextDocumentType, @"public.html",
-		NSDocFormatTextDocumentType, @"com.microsoft.word.doc",
-		NSWordMLTextDocumentType, @"org.openxmlformats.wordprocessingml.document",
-		nil];
+				  NSPlainTextDocumentType, kUTTypePlainText,
+				  NSRTFTextDocumentType, (NSString *)kUTTypeRTF,
+				  NSRTFDTextDocumentType, (NSString *)kUTTypeRTFD,
+				  NSWebArchiveTextDocumentType, (NSString *)kUTTypeWebArchive,
+				  NSHTMLTextDocumentType, (NSString *)kUTTypeHTML,
+				  NSDocFormatTextDocumentType, Word97Type,
+				  NSWordMLTextDocumentType, Word2003XMLType,
+				  NSOfficeOpenXMLTextDocumentType, Word2007Type,
+				  NSOpenDocumentTextDocumentType, OpenDocumentTextType,
+				  nil];
 		[sTypes retain];
 	}
 }
