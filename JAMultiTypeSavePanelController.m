@@ -50,21 +50,6 @@
 @end
 
 
-#if NS_BLOCKS_AVAILABLE
-@interface JAMultiTypeSavePanelControllerBlockModalDelegate: NSObject
-{
-@private
-	void			(^_handler)(NSInteger result);
-}
-
-- (id) initWithHandler:(void (^)(NSInteger result))handler;
-
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-
-@end
-#endif
-
-
 static NSInteger CompareMenuItems(id a, id b, void *context);
 static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
@@ -227,24 +212,6 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 				  didEndSelector:didEndSelector
 					 contextInfo:nil];
 }
-
-
-#if NS_BLOCKS_AVAILABLE
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
-				modalForWindow:(NSWindow *)docWindow
-			 completionHandler:(void (^)(NSInteger result))handler
-{
-	id modalDelegate = [[[JAMultiTypeSavePanelControllerBlockModalDelegate alloc] initWithHandler:handler] autorelease];
-	
-	[self beginSheetForDirectory:path
-							file:name
-				  modalForWindow:docWindow
-				   modalDelegate:modalDelegate
-				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-					 contextInfo:nil];
-}
-#endif
 
 
 - (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
@@ -536,38 +503,3 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti)
 	if (result.count == 0)  result = nil;
 	return result;
 }
-
-
-#if NS_BLOCKS_AVAILABLE
-@implementation JAMultiTypeSavePanelControllerBlockModalDelegate
-
-- (id) initWithHandler:(void (^)(NSInteger result))handler
-{
-	if ((self = [super init]))
-	{
-		_handler = [handler copy];
-	}
-	return self;
-}
-
-
-- (void) dealloc
-{
-	[_handler release];
-	
-	[super dealloc];
-}
-
-
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController
-			 returnCode:(NSInteger)returnCode
-			contextInfo:(void *)contextInfo
-{
-	if (_handler != nil)
-	{
-		_handler(returnCode);
-	}
-}
-
-@end
-#endif
