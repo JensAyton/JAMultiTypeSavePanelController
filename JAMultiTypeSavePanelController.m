@@ -222,21 +222,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	[self prepareToRun];
 	NSInteger result;
 	
-#if USE_BLOCKY_APIS
-	NSSavePanel *panel = self.savePanel;
-	
-	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
-	
-	[self beginSheetForDirectoryURL:directoryURL 
-							   file:name 
-					 modalForWindow:nil 
-				  completionHandler:^(NSInteger result)
-	 {
-		 [self savePanelDidEnd:panel returnCode:result contextInfo:NULL];
-	 }];
-#else
 	result = [self.savePanel runModalForDirectory:path file:name];
-#endif
 	
 	[self cleanUp];
 	return result;
