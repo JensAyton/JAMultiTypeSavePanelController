@@ -36,11 +36,29 @@ void populateSTypes() {
 
 @implementation TestController
 
-- (IBAction) save:(id)sender
-{
+- (JAMultiTypeSavePanelController *) prepareSaveController {
 	populateSTypes();
+	
 	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
 	saveController.autoSaveSelectedUTIKey = @"type";
+	
+	// Documents that contain attachments can only be saved in formats that support embedded graphics. 
+	if ([textView.textStorage containsAttachments])
+	{
+		saveController.enabledUTIs = [NSSet setWithObjects:(NSString *)kUTTypeRTFD, (NSString *)kUTTypeWebArchive, nil];
+	}
+	else
+	{
+		saveController.enabledUTIs = nil; // Setting enabledUTIs to nil prevents it from having any effect.
+	}
+	
+	return saveController;
+}
+
+- (IBAction) save:(id)sender
+{
+	JAMultiTypeSavePanelController *saveController = [self prepareSaveController];
+	
 	[saveController beginForFile:@"untitled"
 				  modalForWindow:window
 				   modalDelegate:self
@@ -50,17 +68,7 @@ void populateSTypes() {
 #if NS_BLOCKS_AVAILABLE
 - (IBAction) saveUsingBlock:(id)sender
 {
-	populateSTypes();
-	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
-	saveController.autoSaveSelectedUTIKey = @"type";
-
-	// Documents that contain attachments can only be saved in formats that support embedded graphics. 
-	if ([textView.textStorage containsAttachments]) {
-		saveController.enabledUTIs = [NSSet setWithObjects:(NSString *)kUTTypeRTFD, (NSString *)kUTTypeWebArchive, nil];
-	}
-	else {
-		saveController.enabledUTIs = nil; // Setting enabledUTIs to nil prevents it from having any effect.
-	}
+	JAMultiTypeSavePanelController *saveController = [self prepareSaveController];
 	
 	[saveController beginSheetForFileName:@"untitled"
 						   modalForWindow:window 
