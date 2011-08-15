@@ -106,7 +106,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (NSString *) selectedUTI
 {
-	return _selectedUTI;
+	return [[_selectedUTI retain] autorelease];
 }
 
 
@@ -115,7 +115,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (uti != nil && ![uti isEqualToString:_selectedUTI] && [self.supportedUTIs containsObject:uti])
 	{
 		[_selectedUTI autorelease];
-		_selectedUTI = [uti retain];
+		_selectedUTI = [uti copy];
 		
 		[self selectUTI:uti];
 		[self updateSavePanelFileTypes];
@@ -125,7 +125,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (NSString *) autoSaveSelectedUTIKey
 {
-	return _autoSaveSelectedUTIKey;
+	return [[_autoSaveSelectedUTIKey retain] autorelease];
 }
 
 
@@ -134,7 +134,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (![key isEqualToString:_autoSaveSelectedUTIKey])
 	{
 		[_autoSaveSelectedUTIKey release];
-		_autoSaveSelectedUTIKey = [key retain];
+		_autoSaveSelectedUTIKey = [key copy];
 		
 		if (key != nil)
 		{
