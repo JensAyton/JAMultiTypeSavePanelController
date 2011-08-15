@@ -99,10 +99,13 @@ void populateSTypes() {
 	if (returnCode == NSOKButton)
 	{
 		NSError *error = nil;
+		
 		NSString *documentType = [sTypes objectForKey:sheetController.selectedUTI];
 		NSLog(@"Saving as %@/%@", sheetController.selectedUTI, documentType);
 		
-		NSRange range = {0, textView.textStorage.length};
+		NSTextStorage *textStorage = textView.textStorage;
+		
+		NSRange range = {0, textStorage.length};
 		NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 		NSURL *fileURL = sheetController.savePanel.URL;
@@ -113,11 +116,11 @@ void populateSTypes() {
 		NSFileWrapper *wrapper = nil;
 		if (documentType == NSRTFDTextDocumentType || (documentType == NSPlainTextDocumentType))
 		{
-			wrapper = [textView.textStorage fileWrapperFromRange:range documentAttributes:attributesDict error:&error];
+			wrapper = [textStorage fileWrapperFromRange:range documentAttributes:attributesDict error:&error];
 		}
 		else
 		{
-			NSData *data = [textView.textStorage dataFromRange:range documentAttributes:attributesDict error:&error];
+			NSData *data = [textStorage dataFromRange:range documentAttributes:attributesDict error:&error];
 			if (data) {
 				wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
 				if (!wrapper && &error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
