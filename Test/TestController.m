@@ -17,7 +17,7 @@ void populateSTypes() {
 	// Unfortunately, NSAttributedString will only give you types that are not UTIs and specify readable rather than writeable types, so we need to do this manually.
 	if (sTypes == nil)
 	{
-		sTypes = [NSDictionary dictionaryWithObjectsAndKeys:
+		sTypes = [[NSDictionary alloc] initWithObjectsAndKeys:
 				  NSPlainTextDocumentType, kUTTypePlainText,
 				  NSRTFTextDocumentType, (NSString *)kUTTypeRTF,
 				  NSRTFDTextDocumentType, (NSString *)kUTTypeRTFD,
@@ -28,7 +28,6 @@ void populateSTypes() {
 				  NSOfficeOpenXMLTextDocumentType, Word2007Type,
 				  NSOpenDocumentTextDocumentType, OpenDocumentTextType,
 				  nil];
-		[sTypes retain];
 	}
 }
 
