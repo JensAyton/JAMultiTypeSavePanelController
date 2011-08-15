@@ -30,16 +30,24 @@ void populateSTypes() {
 }
 
 @interface TestController ()
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)saveController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 @end
 
 
 @implementation TestController
 
-- (JAMultiTypeSavePanelController *) prepareSaveController {
+- (void) dealloc
+{
+	[saveController release];
+	
+	[super dealloc];
+}
+
+- (void) prepareSaveController {
 	populateSTypes();
 	
-	JAMultiTypeSavePanelController *saveController = [JAMultiTypeSavePanelController controllerWithSupportedUTIs:[sTypes allKeys]];
+	if (saveController == nil)  saveController = [[JAMultiTypeSavePanelController alloc] initWithSupportedUTIs:[sTypes allKeys]];
+	
 	saveController.autoSaveSelectedUTIKey = @"type";
 	
 	// Documents that contain attachments can only be saved in formats that support embedded graphics. 
@@ -51,13 +59,11 @@ void populateSTypes() {
 	{
 		saveController.enabledUTIs = nil; // Setting enabledUTIs to nil prevents it from having any effect.
 	}
-	
-	return saveController;
 }
 
 - (IBAction) save:(id)sender
 {
-	JAMultiTypeSavePanelController *saveController = [self prepareSaveController];
+	[self prepareSaveController];
 	
 	[saveController beginForFile:@"untitled"
 				  modalForWindow:window
@@ -68,7 +74,7 @@ void populateSTypes() {
 #if NS_BLOCKS_AVAILABLE
 - (IBAction) saveUsingBlock:(id)sender
 {
-	JAMultiTypeSavePanelController *saveController = [self prepareSaveController];
+	[self prepareSaveController];
 	
 	[saveController beginSheetForFileName:@"untitled"
 						   modalForWindow:window 
@@ -84,24 +90,24 @@ void populateSTypes() {
 }
 #endif 
 	 
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)saveController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
 	
 	NSLog(@"Save panel result: %i", returnCode);
-	[saveController.savePanel orderOut:nil];
+	[sheetController.savePanel orderOut:nil];
 	
 	if (returnCode == NSOKButton)
 	{
 		NSError *error = nil;
-		NSString *documentType = [sTypes objectForKey:saveController.selectedUTI];
-		NSLog(@"Saving as %@/%@", saveController.selectedUTI, documentType);
+		NSString *documentType = [sTypes objectForKey:sheetController.selectedUTI];
+		NSLog(@"Saving as %@/%@", sheetController.selectedUTI, documentType);
 		
 		NSRange range = {0, textView.textStorage.length};
 		NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
-		NSURL *fileURL = saveController.savePanel.URL;
+		NSURL *fileURL = sheetController.savePanel.URL;
 #else
-		NSString *path = saveController.savePanel.filename;
+		NSString *path = sheetController.savePanel.filename;
 #endif
 		
 		NSFileWrapper *wrapper = nil;
