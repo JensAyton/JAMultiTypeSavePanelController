@@ -2,6 +2,9 @@
 #import "JAMultiTypeSavePanelController.h"
 
 
+NSString * const	DefaultFileName								= @"untitled";
+
+
 NSString * const	Word97Type									= @"com.microsoft.word.doc";
 NSString * const	Word2003XMLType								= @"com.microsoft.word.wordml";
 NSString * const	Word2007Type								= @"org.openxmlformats.wordprocessingml.document";
@@ -65,7 +68,7 @@ void populateSTypes() {
 {
 	[self prepareSaveController];
 	
-	[saveController beginForFile:@"untitled"
+	[saveController beginForFile:DefaultFileName
 				  modalForWindow:window
 				   modalDelegate:self
 				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)];
@@ -76,7 +79,7 @@ void populateSTypes() {
 {
 	[self prepareSaveController];
 	
-	[saveController beginSheetForFileName:@"untitled"
+	[saveController beginSheetForFileName:DefaultFileName
 						   modalForWindow:window 
 						completionHandler:^(NSInteger returnCode) {
 							// Alternatively, code similar to “-savePanelDidEnd:returnCode:contextInfo:” could be included here directly
