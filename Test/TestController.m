@@ -95,7 +95,7 @@ void populateSTypes() {
 - (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
 	
-	NSLog(@"Save panel result: %i", returnCode);
+	NSLog(@"Save panel result: %ld", (long)returnCode);
 	[sheetController.savePanel orderOut:nil];
 	
 	if (returnCode == NSOKButton)
