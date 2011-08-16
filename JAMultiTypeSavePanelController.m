@@ -223,7 +223,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	[self prepareToRun];
 	NSInteger result;
 	
-#if USE_BLOCKY_APIS
+#if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 	NSSavePanel *panel = self.savePanel;
 	if (path != nil)  panel.directoryURL = [NSURL fileURLWithPath:path];
 	else  panel.directoryURL = nil;
