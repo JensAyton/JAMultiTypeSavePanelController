@@ -4,7 +4,8 @@
 	Wrapper for NSSavePanel with a user-selectable list of file types.
 	
 	
-	© 2009 Jens Ayton
+	© 2009–2011 Jens Ayton
+	© 2011 Jan Weiß
 	
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the “Software”),
