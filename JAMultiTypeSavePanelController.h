@@ -80,7 +80,6 @@
 
 #if NS_BLOCKS_AVAILABLE
 - (void) beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
-- (void) beginSheetForDirectory:(NSString *)path file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void) beginSheetForFileName:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void) beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 #endif

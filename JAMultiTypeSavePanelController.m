@@ -246,19 +246,6 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 
 #if NS_BLOCKS_AVAILABLE
-- (void )beginSheetForDirectory:(NSString *)path
-						   file:(NSString *)fileName
-				 modalForWindow:(NSWindow *)window
-			  completionHandler:(void (^)(NSInteger result))handler
-{
-	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
-
-	[self beginSheetForDirectoryURL:directoryURL
-							   file:fileName
-					 modalForWindow:window
-				  completionHandler:handler];
-}
-
 - (void) beginSheetForDirectoryURL:(NSURL *)directoryURL
 							  file:(NSString *)fileName
 					modalForWindow:(NSWindow *)window
