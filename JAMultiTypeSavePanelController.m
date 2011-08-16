@@ -162,6 +162,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	{
 		[_savePanel autorelease];
 		_savePanel = [panel retain];
+		_createdPanel = NO;
 	}
 }
 
@@ -265,15 +266,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	
 	[self beginSheetForFileName:fileName
 				 modalForWindow:(NSWindow *)window
-			  completionHandler:^(NSInteger result) {
-				  handler(result);
-				  if (_createdPanel) {
-					  self.savePanel = nil;
-					  _createdPanel = NO;
-				  }
-				  // Cleanup is done in -beginSheetModalForWindow:completionHandler:
-			  }
-	 ];
+			  completionHandler:handler];
 }
 
 - (void)beginSheetForFileName:(NSString *)fileName
@@ -298,8 +291,11 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (_prepared == NO) [self prepareToRun];
 
 	_running = YES;
-	[self.savePanel beginSheetModalForWindow:window completionHandler:^(NSInteger result) {
+	[self.savePanel beginSheetModalForWindow:window 
+						   completionHandler:^(NSInteger result) 
+	{
 		handler(result);
+		
 		[self cleanUp];
 	}];
 }
@@ -308,10 +304,10 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (void) prepareToRun
 {
-	if (self.savePanel == nil)
+	if (_savePanel == nil)
 	{
-		self.savePanel = [NSSavePanel savePanel];
-		self.savePanel.canSelectHiddenExtension = YES;
+		_savePanel = [[NSSavePanel savePanel] retain];
+		_savePanel.canSelectHiddenExtension = YES;
 		_createdPanel = YES;
 	}
 	
@@ -475,11 +471,6 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	
 	[self cleanUp];
 	
-	if (_createdPanel)
-	{
-		self.savePanel = nil;
-		_createdPanel = NO;
-	}
 	[self release];		// Balanced in beginSheetForDirectory:file:modalForWindow:modalDelegate:didEndSelector:contextInfo:
 }
 
