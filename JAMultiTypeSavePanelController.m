@@ -167,7 +167,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 
 - (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
+						  file:(NSString *)fileName
 				modalForWindow:(NSWindow *)docWindow
 				 modalDelegate:(id)delegate
 				didEndSelector:(SEL)didEndSelector
@@ -184,7 +184,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
 
 	[self beginSheetForDirectoryURL:directoryURL
-							   file:name 
+							   file:fileName 
 					 modalForWindow:docWindow 
 				  completionHandler:^(NSInteger result)
 	 {
@@ -194,7 +194,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	[self prepareToRun];
 	
 	[self.savePanel beginSheetForDirectory:path
-									  file:name
+									  file:fileName
 						    modalForWindow:docWindow
 							 modalDelegate:self
 							didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
@@ -203,13 +203,13 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)beginForFile:(NSString *)name
+- (void)beginForFile:(NSString *)fileName
 	  modalForWindow:(NSWindow *)docWindow
 	   modalDelegate:(id)delegate
 	  didEndSelector:(SEL)didEndSelector
 {
 	[self beginSheetForDirectory:nil
-							file:name
+							file:fileName
 				  modalForWindow:docWindow
 				   modalDelegate:delegate
 				  didEndSelector:didEndSelector
@@ -217,12 +217,12 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
+- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)fileName
 {
 	[self prepareToRun];
 	NSInteger result;
 	
-	result = [self.savePanel runModalForDirectory:path file:name];
+	result = [self.savePanel runModalForDirectory:path file:fileName];
 	
 	[self cleanUp];
 	return result;
@@ -237,20 +237,20 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 #if NS_BLOCKS_AVAILABLE
 - (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
+						  file:(NSString *)fileName
 				modalForWindow:(NSWindow *)window
 			 completionHandler:(void (^)(NSInteger result))handler;
 {
 	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
 
 	[self beginSheetForDirectoryURL:directoryURL
-							   file:name 
+							   file:fileName 
 					 modalForWindow:window 
 				  completionHandler:handler];
 }
 
 - (void)beginSheetForDirectoryURL:(NSURL *)directoryURL
-							 file:(NSString *)name
+							 file:(NSString *)fileName
 				   modalForWindow:(NSWindow *)window
 				completionHandler:(void (^)(NSInteger result))handler;
 {
@@ -263,7 +263,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 		[self.savePanel setDirectoryURL:directoryURL];
 	}
 	
-	[self beginSheetForFileName:name
+	[self beginSheetForFileName:fileName
 				 modalForWindow:(NSWindow *)window
 			  completionHandler:^(NSInteger result) {
 				  handler(result);
@@ -276,15 +276,15 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	 ];
 }
 
-- (void)beginSheetForFileName:(NSString *)name
+- (void)beginSheetForFileName:(NSString *)fileName
 			   modalForWindow:(NSWindow *)window
 			completionHandler:(void (^)(NSInteger result))handler;
 {
 	if (_prepared == NO) [self prepareToRun];
 
-	if (name != nil)
+	if (fileName != nil)
 	{
-		[self.savePanel setNameFieldStringValue:name];
+		[self.savePanel setNameFieldStringValue:fileName];
 	}
 	
 	[self beginSheetModalForWindow:window
