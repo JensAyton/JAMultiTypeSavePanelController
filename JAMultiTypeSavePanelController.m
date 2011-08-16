@@ -3,6 +3,7 @@
 	
 	
 	© 2009–2011 Jens Ayton
+	© 2011 Jan Weiß
 	
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the “Software”),
@@ -41,27 +42,12 @@
 - (void) cleanUp;
 
 - (void) buildMenu;
-- (void) selectUTI:(NSString *)uti;
+- (BOOL) selectUTI:(NSString *)uti;
 - (void) updateSavePanelFileTypes;
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 
 @end
-
-
-#if NS_BLOCKS_AVAILABLE
-@interface JAMultiTypeSavePanelControllerBlockModalDelegate: NSObject
-{
-@private
-	void			(^_handler)(NSInteger result);
-}
-
-- (id) initWithHandler:(void (^)(NSInteger result))handler;
-
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
-
-@end
-#endif
 
 
 static NSInteger CompareMenuItems(id a, id b, void *context);
@@ -71,6 +57,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @implementation JAMultiTypeSavePanelController
 
 @synthesize supportedUTIs = _supportedUTIs;
+@synthesize enabledUTIs = _enabledUTIs;
 @synthesize sortTypesByName = _sortTypesByName;
 
 @synthesize accessoryView = _accessoryView;
@@ -94,6 +81,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if ((self = [super init]))
 	{
 		self.supportedUTIs = supportedUTIs;
+		self.enabledUTIs = nil;
 		self.sortTypesByName = YES;
 	}
 	
@@ -108,6 +96,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	_formatPopUp = nil;
 	
 	self.selectedUTI = nil;
+	self.enabledUTIs = nil;
 	self.autoSaveSelectedUTIKey = nil;
 	self.savePanel = nil;
 	
@@ -117,7 +106,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (NSString *) selectedUTI
 {
-	return _selectedUTI;
+	return [[_selectedUTI retain] autorelease];
 }
 
 
@@ -126,7 +115,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (uti != nil && ![uti isEqualToString:_selectedUTI] && [self.supportedUTIs containsObject:uti])
 	{
 		[_selectedUTI autorelease];
-		_selectedUTI = [uti retain];
+		_selectedUTI = [uti copy];
 		
 		[self selectUTI:uti];
 		[self updateSavePanelFileTypes];
@@ -136,7 +125,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (NSString *) autoSaveSelectedUTIKey
 {
-	return _autoSaveSelectedUTIKey;
+	return [[_autoSaveSelectedUTIKey retain] autorelease];
 }
 
 
@@ -145,7 +134,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (![key isEqualToString:_autoSaveSelectedUTIKey])
 	{
 		[_autoSaveSelectedUTIKey release];
-		_autoSaveSelectedUTIKey = [key retain];
+		_autoSaveSelectedUTIKey = [key copy];
 		
 		if (key != nil)
 		{
@@ -167,42 +156,46 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 
 - (void) setSavePanel:(NSSavePanel *)panel
 {
-	NSAssert(!_running, @"Can't set savePanel of JAMultiTypeSavePanelController while save panel is running.");
+	NSAssert(!_prepared, @"Can't set savePanel of JAMultiTypeSavePanelController after save panel has been prepared.");
 	
 	if (panel != _savePanel)
 	{
 		[_savePanel autorelease];
 		_savePanel = [panel retain];
+		_createdPanel = NO;
 	}
 }
 
 
 - (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
+						  file:(NSString *)fileName
 				modalForWindow:(NSWindow *)docWindow
 				 modalDelegate:(id)delegate
 				didEndSelector:(SEL)didEndSelector
 				   contextInfo:(void *)contextInfo
 {
-	[self prepareToRun];
 	[self retain];		// Balanced in savePanelDidEnd:returnCode:contextInfo:
+
 	_modalDelegate = [delegate retain];
 	_selector = didEndSelector;
-	
+
 #if USE_BLOCKY_APIS
 	NSSavePanel *panel = self.savePanel;
-	if (path != nil)  panel.directoryURL = [NSURL fileURLWithPath:path];
-	else  panel.directoryURL = nil;
-	panel.nameFieldStringValue = name;
-	
-	[panel beginSheetModalForWindow:docWindow
+
+	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
+
+	[self beginSheetForDirectoryURL:directoryURL
+							   file:fileName 
+					 modalForWindow:docWindow 
 				  completionHandler:^(NSInteger result)
-	{
-		[self savePanelDidEnd:panel returnCode:result contextInfo:contextInfo];
-	}];
+	 {
+		 [self savePanelDidEnd:panel returnCode:result contextInfo:contextInfo];
+	 }];
 #else
+	[self prepareToRun];
+	
 	[self.savePanel beginSheetForDirectory:path
-									  file:name
+									  file:fileName
 						    modalForWindow:docWindow
 							 modalDelegate:self
 							didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
@@ -211,13 +204,13 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)beginForFile:(NSString *)name
+- (void)beginForFile:(NSString *)fileName
 	  modalForWindow:(NSWindow *)docWindow
 	   modalDelegate:(id)delegate
 	  didEndSelector:(SEL)didEndSelector
 {
 	[self beginSheetForDirectory:nil
-							file:name
+							file:fileName
 				  modalForWindow:docWindow
 				   modalDelegate:delegate
 				  didEndSelector:didEndSelector
@@ -225,39 +218,12 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-#if NS_BLOCKS_AVAILABLE
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)name
-				modalForWindow:(NSWindow *)docWindow
-			 completionHandler:(void (^)(NSInteger result))handler
-{
-	id modalDelegate = [[[JAMultiTypeSavePanelControllerBlockModalDelegate alloc] initWithHandler:handler] autorelease];
-	
-	[self beginSheetForDirectory:path
-							file:name
-				  modalForWindow:docWindow
-				   modalDelegate:modalDelegate
-				  didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:)
-					 contextInfo:nil];
-}
-#endif
-
-
-- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)name
+- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)fileName
 {
 	[self prepareToRun];
 	NSInteger result;
 	
-#if USE_BLOCKY_APIS
-	NSSavePanel *panel = self.savePanel;
-	if (path != nil)  panel.directoryURL = [NSURL fileURLWithPath:path];
-	else  panel.directoryURL = nil;
-	panel.nameFieldStringValue = name;
-	
-	result = [panel runModal];
-#else
-	result = [self.savePanel runModalForDirectory:path file:name];
-#endif
+	result = [self.savePanel runModalForDirectory:path file:fileName];
 	
 	[self cleanUp];
 	return result;
@@ -270,12 +236,78 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
+#if NS_BLOCKS_AVAILABLE
+- (void)beginSheetForDirectory:(NSString *)path
+						  file:(NSString *)fileName
+				modalForWindow:(NSWindow *)window
+			 completionHandler:(void (^)(NSInteger result))handler;
+{
+	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
+
+	[self beginSheetForDirectoryURL:directoryURL
+							   file:fileName 
+					 modalForWindow:window 
+				  completionHandler:handler];
+}
+
+- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL
+							 file:(NSString *)fileName
+				   modalForWindow:(NSWindow *)window
+				completionHandler:(void (^)(NSInteger result))handler;
+{
+	NSAssert(!_prepared, @"Can't begin another savePanel of JAMultiTypeSavePanelController while the previous savePanel is still being used.");
+
+	[self prepareToRun];
+	
+	if (directoryURL != nil)
+	{
+		[self.savePanel setDirectoryURL:directoryURL];
+	}
+	
+	[self beginSheetForFileName:fileName
+				 modalForWindow:(NSWindow *)window
+			  completionHandler:handler];
+}
+
+- (void)beginSheetForFileName:(NSString *)fileName
+			   modalForWindow:(NSWindow *)window
+			completionHandler:(void (^)(NSInteger result))handler;
+{
+	if (_prepared == NO) [self prepareToRun];
+
+	if (fileName != nil)
+	{
+		[self.savePanel setNameFieldStringValue:fileName];
+	}
+	
+	[self beginSheetModalForWindow:window
+				 completionHandler:handler];
+}
+
+
+- (void)beginSheetModalForWindow:(NSWindow *)window 
+			   completionHandler:(void (^)(NSInteger result))handler;
+{
+	if (_prepared == NO) [self prepareToRun];
+
+	_running = YES;
+	[self.savePanel beginSheetModalForWindow:window 
+						   completionHandler:^(NSInteger result) 
+	{
+		handler(result);
+		
+		[self cleanUp];
+	}];
+}
+#endif
+
+
 - (void) prepareToRun
 {
-	if (self.savePanel == nil)
+	if (_savePanel == nil)
 	{
-		self.savePanel = [NSSavePanel savePanel];
-		self.savePanel.canSelectHiddenExtension = YES;
+		_savePanel = [[NSSavePanel savePanel] retain];
+		_savePanel.canSelectHiddenExtension = YES;
 		_createdPanel = YES;
 	}
 	
@@ -285,7 +317,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	self.savePanel.accessoryView = self.accessoryView;
 	[self updateSavePanelFileTypes];
 	
-	_running = YES;
+	_prepared = YES;
 }
 
 
@@ -329,11 +361,42 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	{
 		[menu addItem:item];
 	}
+
+	NSInteger firstEnabledItem = 0;
+
+	if (_enabledUTIs != nil) {
+		[menu setAutoenablesItems:NO];
+		
+		firstEnabledItem = -1;
+
+		NSInteger count = [menu numberOfItems];
+		NSMenuItem *item;
+		
+		for (int i = 0; i < count; i++) {
+			item = [menu itemAtIndex:i];
+			
+			if (![_enabledUTIs member:item.representedObject])
+			{
+				[item setEnabled:NO];
+			}
+			else
+			{
+				if (firstEnabledItem == -1) firstEnabledItem = i;  
+			}
+		}
+	}
+	else
+	{
+		[menu setAutoenablesItems:YES];
+	}
 	
 	self.formatPopUp.menu = menu;
 	
-	if (self.selectedUTI != nil)  [self selectUTI:self.selectedUTI];
-	else  self.selectedUTI = [[menu itemAtIndex:0] representedObject];
+	if ( !(self.selectedUTI != nil && [self selectUTI:self.selectedUTI]) )
+	{
+		self.selectedUTI = [[menu itemAtIndex:firstEnabledItem] representedObject];
+		[self selectUTI:self.selectedUTI];
+	}
 	
 	[menu release];
 }
@@ -342,24 +405,38 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 - (void) cleanUp
 {
 	_running = NO;
+
 	self.savePanel.accessoryView = nil;
 	
 	if (self.autoSaveSelectedUTIKey != nil)
 	{
 		[[NSUserDefaults standardUserDefaults] setObject:self.selectedUTI forKey:self.autoSaveSelectedUTIKey];
 	}
+
+	_prepared = NO;
 }
 
 
-- (void) selectUTI:(NSString *)uti
+- (BOOL) selectUTI:(NSString *)uti
 {
 	if (self.formatPopUp != nil)
 	{
-		NSInteger index = [self.formatPopUp indexOfItemWithRepresentedObject:uti];
-		if (index != NSNotFound)
+		NSMenu *menu = self.formatPopUp.menu;
+		NSInteger index = [menu indexOfItemWithRepresentedObject:uti];
+		NSMenuItem *item = [menu itemAtIndex:index];
+		if ((index != NSNotFound) && [item isEnabled])
 		{
 			[self.formatPopUp selectItemAtIndex:index];
+			return YES;
 		}
+		else
+		{
+			return NO;
+		}
+	}
+	else
+	{
+		return NO;
 	}
 }
 
@@ -394,18 +471,13 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	
 	[self cleanUp];
 	
-	if (_createdPanel)
-	{
-		self.savePanel = nil;
-		_createdPanel = NO;
-	}
 	[self release];		// Balanced in beginSheetForDirectory:file:modalForWindow:modalDelegate:didEndSelector:contextInfo:
 }
 
 @end
 
 
-static int CompareMenuItems(id a, id b, void *context)
+NSInteger CompareMenuItems(id a, id b, void *context)
 {
 #pragma unused (context)
 	return [[a title] caseInsensitiveCompare:[b title]];
@@ -433,7 +505,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti)
 		[seenUTIs addObject:thisUTI];
 		
 		// Add UTIs this UTI conforms to to the queue.
-		NSDictionary *thisUTIDecl = (NSDictionary *)UTTypeCopyDeclaration((CFStringRef)thisUTI);
+		NSDictionary *thisUTIDecl = [NSMakeCollectable(UTTypeCopyDeclaration((CFStringRef)thisUTI)) autorelease];
 		id thisConformsTo = [thisUTIDecl objectForKey:(NSString *)kUTTypeConformsToKey];
 		// Conforms to may be an array or a single string.
 		if ([thisConformsTo isKindOfClass:[NSString class]])  [queue addObject:thisConformsTo];
@@ -453,38 +525,3 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti)
 	if (result.count == 0)  result = nil;
 	return result;
 }
-
-
-#if NS_BLOCKS_AVAILABLE
-@implementation JAMultiTypeSavePanelControllerBlockModalDelegate
-
-- (id) initWithHandler:(void (^)(NSInteger result))handler
-{
-	if ((self = [super init]))
-	{
-		_handler = [handler copy];
-	}
-	return self;
-}
-
-
-- (void) dealloc
-{
-	[_handler release];
-	
-	[super dealloc];
-}
-
-
-- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController
-			 returnCode:(NSInteger)returnCode
-			contextInfo:(void *)contextInfo
-{
-	if (_handler != nil)
-	{
-		_handler(returnCode);
-	}
-}
-
-@end
-#endif
