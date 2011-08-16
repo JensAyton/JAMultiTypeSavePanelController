@@ -13,7 +13,7 @@ NSString * const	OpenDocumentTextType						= @"org.oasis-open.opendocument.text"
 
 static NSDictionary *sTypes = nil;
 
-void populateSTypes() {
+static void PopulateSTypes(void) {
 	// Unfortunately, NSAttributedString will only give you types that are not UTIs and specify readable rather than writeable types, so we need to do this manually.
 	if (sTypes == nil)
 	{
@@ -46,7 +46,7 @@ void populateSTypes() {
 }
 
 - (void) prepareSaveController {
-	populateSTypes();
+	PopulateSTypes();
 	
 	if (saveController == nil)  saveController = [[JAMultiTypeSavePanelController alloc] initWithSupportedUTIs:[sTypes allKeys]];
 	

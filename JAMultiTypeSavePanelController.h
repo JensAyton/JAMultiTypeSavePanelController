@@ -63,12 +63,12 @@
 /*	Exactly like the NSSavePanel equivalent, except that the didEndSelector's signature should match:
 	- (void)savePanelDidEnd:(JAMultiTypeSavePanelController *)sheetController returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
 */
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)fileName
-				modalForWindow:(NSWindow *)docWindow
-				 modalDelegate:(id)delegate
-				didEndSelector:(SEL)didEndSelector
-				   contextInfo:(void *)contextInfo;
+- (void) beginSheetForDirectory:(NSString *)path
+						   file:(NSString *)fileName
+				 modalForWindow:(NSWindow *)docWindow
+				  modalDelegate:(id)delegate
+				 didEndSelector:(SEL)didEndSelector
+					contextInfo:(void *)contextInfo;
 
 /*	Simplified version of the above; directory path and contextInfo are nil.
 */
@@ -79,14 +79,14 @@
 
 
 #if NS_BLOCKS_AVAILABLE
-- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
-- (void)beginSheetForDirectory:(NSString *)path file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
-- (void)beginSheetForFileName:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
-- (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetForDirectoryURL:(NSURL *)directoryURL file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetForDirectory:(NSString *)path file:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetForFileName:(NSString *)fileName modalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 #endif
 
-- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)fileName;
-- (NSInteger)runModal;
+- (NSInteger) runModalForDirectory:(NSString *)path file:(NSString *)fileName;
+- (NSInteger) runModal;
 
 @property (assign, nonatomic) IBOutlet NSView *accessoryView;
 @property (assign, nonatomic) IBOutlet NSPopUpButton *formatPopUp;

@@ -167,12 +167,12 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)fileName
-				modalForWindow:(NSWindow *)docWindow
-				 modalDelegate:(id)delegate
-				didEndSelector:(SEL)didEndSelector
-				   contextInfo:(void *)contextInfo
+- (void) beginSheetForDirectory:(NSString *)path
+						   file:(NSString *)fileName
+				 modalForWindow:(NSWindow *)docWindow
+				  modalDelegate:(id)delegate
+				 didEndSelector:(SEL)didEndSelector
+					contextInfo:(void *)contextInfo
 {
 	[self retain];		// Balanced in savePanelDidEnd:returnCode:contextInfo:
 
@@ -185,8 +185,8 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
 
 	[self beginSheetForDirectoryURL:directoryURL
-							   file:fileName 
-					 modalForWindow:docWindow 
+							   file:fileName
+					 modalForWindow:docWindow
 				  completionHandler:^(NSInteger result)
 	 {
 		 [self savePanelDidEnd:panel returnCode:result contextInfo:contextInfo];
@@ -204,10 +204,10 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)beginForFile:(NSString *)fileName
-	  modalForWindow:(NSWindow *)docWindow
-	   modalDelegate:(id)delegate
-	  didEndSelector:(SEL)didEndSelector
+- (void) beginForFile:(NSString *)fileName
+	   modalForWindow:(NSWindow *)docWindow
+		modalDelegate:(id)delegate
+	   didEndSelector:(SEL)didEndSelector
 {
 	[self beginSheetForDirectory:nil
 							file:fileName
@@ -218,7 +218,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (NSInteger)runModalForDirectory:(NSString *)path file:(NSString *)fileName
+- (NSInteger) runModalForDirectory:(NSString *)path file:(NSString *)fileName
 {
 	[self prepareToRun];
 	NSInteger result;
@@ -230,30 +230,30 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (NSInteger)runModal
+- (NSInteger) runModal
 {
 	return [self runModalForDirectory:nil file:@""];
 }
 
 
 #if NS_BLOCKS_AVAILABLE
-- (void)beginSheetForDirectory:(NSString *)path
-						  file:(NSString *)fileName
-				modalForWindow:(NSWindow *)window
-			 completionHandler:(void (^)(NSInteger result))handler;
+- (void )beginSheetForDirectory:(NSString *)path
+						   file:(NSString *)fileName
+				 modalForWindow:(NSWindow *)window
+			  completionHandler:(void (^)(NSInteger result))handler
 {
 	NSURL *directoryURL = (path != nil) ? [NSURL fileURLWithPath:path] : nil;
 
 	[self beginSheetForDirectoryURL:directoryURL
-							   file:fileName 
-					 modalForWindow:window 
+							   file:fileName
+					 modalForWindow:window
 				  completionHandler:handler];
 }
 
-- (void)beginSheetForDirectoryURL:(NSURL *)directoryURL
-							 file:(NSString *)fileName
-				   modalForWindow:(NSWindow *)window
-				completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetForDirectoryURL:(NSURL *)directoryURL
+							  file:(NSString *)fileName
+					modalForWindow:(NSWindow *)window
+				 completionHandler:(void (^)(NSInteger result))handler
 {
 	NSAssert(!_prepared, @"Can't begin another savePanel of JAMultiTypeSavePanelController while the previous savePanel is still being used.");
 
@@ -269,9 +269,9 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 			  completionHandler:handler];
 }
 
-- (void)beginSheetForFileName:(NSString *)fileName
-			   modalForWindow:(NSWindow *)window
-			completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetForFileName:(NSString *)fileName
+				modalForWindow:(NSWindow *)window
+			 completionHandler:(void (^)(NSInteger result))handler
 {
 	if (_prepared == NO) [self prepareToRun];
 
@@ -285,14 +285,14 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)beginSheetModalForWindow:(NSWindow *)window 
-			   completionHandler:(void (^)(NSInteger result))handler;
+- (void) beginSheetModalForWindow:(NSWindow *)window
+			    completionHandler:(void (^)(NSInteger result))handler
 {
 	if (_prepared == NO) [self prepareToRun];
 
 	_running = YES;
-	[self.savePanel beginSheetModalForWindow:window 
-						   completionHandler:^(NSInteger result) 
+	[self.savePanel beginSheetModalForWindow:window
+						   completionHandler:^(NSInteger result)
 	{
 		handler(result);
 		
@@ -381,7 +381,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 			}
 			else
 			{
-				if (firstEnabledItem == -1) firstEnabledItem = i;  
+				if (firstEnabledItem == -1) firstEnabledItem = i;
 			}
 		}
 	}
@@ -456,7 +456,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+- (void) savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
 	if (_modalDelegate != nil && _selector != NULL)
 	{
@@ -477,7 +477,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 @end
 
 
-NSInteger CompareMenuItems(id a, id b, void *context)
+static NSInteger CompareMenuItems(id a, id b, void *context)
 {
 #pragma unused (context)
 	return [[a title] caseInsensitiveCompare:[b title]];
