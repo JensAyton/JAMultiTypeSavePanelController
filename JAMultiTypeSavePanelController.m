@@ -258,11 +258,11 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 	if (directoryURL != nil)
 	{
 		// Check if directoryURL is available and a directory.
-		NSNumber *isDirectoryValue;
+		NSNumber *isDirectoryValue = nil;
 		if ([directoryURL isFileURL]
 			&& [directoryURL checkResourceIsReachableAndReturnError:NULL] 
 			&& [directoryURL getResourceValue:&isDirectoryValue forKey:NSURLIsDirectoryKey error:NULL] 
-			&& ([isDirectoryValue integerValue] == 1) )
+			&& ([isDirectoryValue boolValue]) )
 		{
 			[self.savePanel setDirectoryURL:directoryURL];
 		}
