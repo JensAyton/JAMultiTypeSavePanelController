@@ -43,6 +43,7 @@
 
 - (void) buildMenu;
 - (BOOL) selectUTI:(NSString *)uti;
+- (void) menuItemSelected:(NSMenuItem *)item;
 - (void) updateSavePanelFileTypes;
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
@@ -445,7 +446,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void) menuItemSelected:(NSMenuItem *)item
+- (void) menuItemSelected:(NSMenuItem *)item;
 {
 	self.selectedUTI = item.representedObject;
 }
