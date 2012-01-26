@@ -6,10 +6,15 @@
 //  Copyright (c) 2012 geheimwerk.de. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
 @interface NSAttributedString (FileWrapper)
 
-- (NSFileWrapper *)fileWrapperForDocumentType:(NSString *)documentType error:(NSError **)error;
+- (NSFileWrapper *)fileWrapperForDocumentType:(NSString *)documentType 
+										error:(NSError **)error;
+
+- (NSFileWrapper *)fileWrapperForDocumentType:(NSString *)documentType 
+								   attributes:(NSDictionary *)attributes 
+										error:(NSError **)error;
 
 @end
