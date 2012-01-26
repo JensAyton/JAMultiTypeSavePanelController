@@ -11,6 +11,7 @@
 		1A4605C5102A2CD4001ADB67 /* JAMultiTypeSavePanelController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1A4605C2102A2CD4001ADB67 /* JAMultiTypeSavePanelController.xib */; };
 		1A4605C8102A2CDE001ADB67 /* TestController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A4605C7102A2CDE001ADB67 /* TestController.m */; };
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		3D7A71E814D1EBDE00216876 /* NSAttributedString+FileWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D7A71E714D1EBDE00216876 /* NSAttributedString+FileWrapper.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -30,6 +31,8 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* JAMultiTypeSavePanelControllerTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JAMultiTypeSavePanelControllerTest_Prefix.pch; sourceTree = "<group>"; };
+		3D7A71E614D1EBDE00216876 /* NSAttributedString+FileWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+FileWrapper.h"; sourceTree = "<group>"; };
+		3D7A71E714D1EBDE00216876 /* NSAttributedString+FileWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+FileWrapper.m"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* JAMultiTypeSavePanelControllerTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JAMultiTypeSavePanelControllerTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -87,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				080E96DDFE201D6D7F000001 /* Classes */,
+				3D7A71E514D1EBB600216876 /* Categories */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -122,6 +126,15 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3D7A71E514D1EBB600216876 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				3D7A71E614D1EBDE00216876 /* NSAttributedString+FileWrapper.h */,
+				3D7A71E714D1EBDE00216876 /* NSAttributedString+FileWrapper.m */,
+			);
+			name = Categories;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -193,6 +206,7 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				1A4605C4102A2CD4001ADB67 /* JAMultiTypeSavePanelController.m in Sources */,
 				1A4605C8102A2CDE001ADB67 /* TestController.m in Sources */,
+				3D7A71E814D1EBDE00216876 /* NSAttributedString+FileWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
