@@ -1,6 +1,7 @@
 #import "TestController.h"
 #import "JAMultiTypeSavePanelController.h"
 
+#import "NSAttributedString+FileWrapper.h"
 
 NSString * const	DefaultFileName								= @"untitled";
 
@@ -107,27 +108,13 @@ static void PopulateSTypes(void) {
 		
 		NSTextStorage *textStorage = textView.textStorage;
 		
-		NSRange range = {0, textStorage.length};
-		NSDictionary *attributesDict = [NSDictionary dictionaryWithObject:documentType forKey:NSDocumentTypeDocumentAttribute];
 #if (MAC_OS_X_VERSION_MIN_REQUIRED >= 1060)
 		NSURL *fileURL = sheetController.savePanel.URL;
 #else
 		NSString *path = sheetController.savePanel.filename;
 #endif
-		
-		NSFileWrapper *wrapper = nil;
-		if (documentType == NSRTFDTextDocumentType || (documentType == NSPlainTextDocumentType))
-		{
-			wrapper = [textStorage fileWrapperFromRange:range documentAttributes:attributesDict error:&error];
-		}
-		else
-		{
-			NSData *data = [textStorage dataFromRange:range documentAttributes:attributesDict error:&error];
-			if (data) {
-				wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
-				if (!wrapper && &error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
-			}
-		}
+        
+		NSFileWrapper *wrapper = [textStorage fileWrapperForDocumentType:documentType error:&error];
 		
 		BOOL OK = (wrapper != nil);
 		

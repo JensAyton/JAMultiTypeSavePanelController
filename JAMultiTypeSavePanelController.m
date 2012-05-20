@@ -3,7 +3,7 @@
 	
 	
 	© 2009–2011 Jens Ayton
-	© 2011 Jan Weiß
+	© 2011-2012 Jan Weiß
 	
 	Permission is hereby granted, free of charge, to any person obtaining a
 	copy of this software and associated documentation files (the “Software”),
@@ -43,6 +43,7 @@
 
 - (void) buildMenu;
 - (BOOL) selectUTI:(NSString *)uti;
+- (void) menuItemSelected:(NSMenuItem *)item;
 - (void) updateSavePanelFileTypes;
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
