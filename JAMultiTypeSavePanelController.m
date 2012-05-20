@@ -446,7 +446,7 @@ static NSArray *AllowedExtensionsForUTI(NSString *uti);
 }
 
 
-- (void) menuItemSelected:(NSMenuItem *)item;
+- (void) menuItemSelected:(NSMenuItem *)item
 {
 	self.selectedUTI = item.representedObject;
 }
